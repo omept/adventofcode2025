@@ -43,22 +43,13 @@ THIS EXAMPLE DOESN'T USE UNICODE-SAFE [][]rune grid. It's faster but it assume t
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
+
+	"github.com/omept/adventofcode2025/day4"
 )
 
 func main() {
-	scanner := bufio.NewScanner(os.Stdin)
-	var grid []string
-
-	for scanner.Scan() {
-		line := scanner.Text()
-		if line == "" {
-			break
-		}
-		grid = append(grid, line)
-	}
+	var grid []string = day4.LoadGridStringFormat()
 
 	h := len(grid)
 	w := len(grid[0])
