@@ -38,6 +38,11 @@ x.@@@.@@@@
 x.x.@@@.x.
 Consider your complete diagram of the paper roll locations. How many rolls of paper can be accessed by a forklift?
 
+--- Part Two ---
+Now, the Elves just need help accessing as much of the paper as they can.
+
+Once a roll of paper can be accessed by a forklift, it can be removed. Once a roll of paper is removed, the forklifts might be able to access more rolls of paper, which they might also be able to remove. How many total rolls of paper could the Elves remove if they keep repeating this process?
+---------------------------------------------------
 THIS EXAMPLE USES UNICODE-SAFE [][]rune grid. It's slower but it doesn't assume that the inputs are ASCII
 */
 package main
@@ -51,6 +56,22 @@ import (
 func main() {
 
 	var grid [][]rune = day4.LoadGridRuneFormat()
+	// onlyAccessible(grid) // one star
+
+	// one more stars
+	accessible, grid := accessibleAndReplace(grid)
+	total := accessible
+
+	for accessible > 0 {
+		accessible, grid = accessibleAndReplace(grid)
+		total += accessible
+	}
+
+	fmt.Println("Total removed: ", total)
+
+}
+
+func onlyAccessible(grid [][]rune) (accessible int64) {
 
 	h := len(grid)
 	w := len(grid[0])
@@ -60,7 +81,7 @@ func main() {
 		{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1},
 	}
 
-	accessible := 0
+	accessible = 0
 
 	for r := 0; r < h; r++ {
 		for c := 0; c < w; c++ {
@@ -90,5 +111,57 @@ func main() {
 	}
 
 	fmt.Println("accessible: ", accessible)
+	return
+}
 
+func accessibleAndReplace(grid [][]rune) (int, [][]rune) {
+
+	h := len(grid)
+	w := len(grid[0])
+
+	// 8 directions
+	dirs := [8][2]int{
+		{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1},
+	}
+
+	//replaceable indexes
+	accessibleShouldReplace := [][]int{}
+
+	accessible := 0
+
+	for r := 0; r < h; r++ {
+		for c := 0; c < w; c++ {
+			if grid[r][c] != rune('@') {
+				continue
+			}
+
+			neighbors := 0
+
+			for _, d := range dirs {
+				nr := r + d[0]
+				nc := c + d[1]
+
+				if nr < 0 || nr >= h || nc < 0 || nc >= w {
+					continue
+				}
+
+				if grid[nr][nc] == rune('@') {
+					neighbors++
+				}
+			}
+
+			if neighbors < 4 {
+				accessible++
+				accessibleShouldReplace = append(accessibleShouldReplace, []int{r, c})
+			}
+		}
+	}
+
+	// replace all accessible rows and columns
+	for _, p := range accessibleShouldReplace {
+		grid[p[0]][p[1]] = 'X'
+	}
+
+	fmt.Printf("Removed %d rolls of paper \n", accessible)
+	return accessible, grid
 }
